@@ -18,10 +18,10 @@ func TestSetGet(t *testing.T) {
 	cache.Set("key", value, 0)
 	res, err := cache.Get("key")
 	if err != nil {
-		panic(err)
+		t.Fatalf("Did not setup and retrieve properly")
 	}
 	if res != value {
-		t.Fatalf("Did not setup and retreive properly")
+		t.Fatalf("Did not setup and retrieve properly")
 	}
 }
 
@@ -75,4 +75,38 @@ func TestFlush(t *testing.T) {
 		t.Fatalf("Didn't flush db")
 	}
 
+}
+
+func TestHSetHGet(t *testing.T) {
+	cache := NewCache(&CacheConfig{
+		"redis://default:password@localhost:6379",
+		"",
+	})
+	cache.HSet("key", "name", "John")
+	res, err := cache.HGet("key", "name")
+	if err != nil {
+		t.Fatalf("Did not setup and retrieve properly")
+	}
+	if res != "John" {
+		t.Fatalf("Did not setup and retrieve properly")
+	}
+}
+
+func TestHMSetHMGet(t *testing.T) {
+	cache := NewCache(&CacheConfig{
+		"redis://default:password@localhost:6379",
+		"",
+	})
+	cache.HMSet("key", map[string]interface{}{
+		"name": "John",
+		"age":  30,
+	})
+	res, err := cache.HMGet("key", "name")
+	if err != nil {
+		t.Fatalf("Did not setup and retrieve properly")
+	}
+	out := res[0].(string)
+	if out != "John" {
+		t.Fatalf("Did not setup and retrieve properly")
+	}
 }

@@ -73,3 +73,31 @@ func (cache *Cache) FlushDB() error {
 	ctx := context.Background()
 	return cache.Client.FlushDB(ctx).Err()
 }
+
+func (cache *Cache) HSet(key string, setKey string, setValue interface{}) (int64, error) {
+	ctx := context.Background()
+	key = cache.Prefix + key
+	set := cache.Client.HSet(ctx, key, setKey, setValue)
+	return set.Val(), set.Err()
+}
+
+func (cache *Cache) HGet(key string, setKey string) (string, error) {
+	ctx := context.Background()
+	key = cache.Prefix + key
+	get := cache.Client.HGet(ctx, key, setKey)
+	return get.Val(), get.Err()
+}
+
+func (cache *Cache) HMSet(key string, setValue map[string]interface{}) (bool, error) {
+	ctx := context.Background()
+	key = cache.Prefix + key
+	set := cache.Client.HMSet(ctx, key, setValue)
+	return set.Val(), set.Err()
+}
+
+func (cache *Cache) HMGet(key string, setKey string) ([]interface{}, error) {
+	ctx := context.Background()
+	key = cache.Prefix + key
+	set := cache.Client.HMGet(ctx, key, setKey)
+	return set.Val(), set.Err()
+}
