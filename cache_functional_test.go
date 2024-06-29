@@ -56,3 +56,23 @@ func TestFindAllKeys(t *testing.T) {
 		t.Fatalf("Did not find all keys")
 	}
 }
+
+func TestFlush(t *testing.T) {
+	cache := NewCache(&CacheConfig{
+		"redis://default:password@localhost:6379",
+		"",
+	})
+	for i := 0; i < 5; i++ {
+		cache.Set(fmt.Sprintf("flush%d", i), fmt.Sprintf("value%d", i), 0)
+	}
+	res, _ := cache.FindAllKeys("flush")
+	if len(res) < 4 {
+		t.Fatalf("Trouble setting up test")
+	}
+	cache.FlushDB()
+	res2, _ := cache.FindAllKeys("flush")
+	if len(res2) != 0 {
+		t.Fatalf("Didn't flush db")
+	}
+
+}

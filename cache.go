@@ -68,3 +68,8 @@ func (cache *Cache) FindAllKeys(key string) ([]string, error) {
 	}
 	return result, nil
 }
+
+func (cache *Cache) FlushDB() error {
+	ctx := context.Background()
+	return cache.Client.FlushDB(ctx).Err()
+}
