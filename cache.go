@@ -28,22 +28,43 @@ func NewCache(cfg *CacheConfig) *Cache {
 	return &Cache{db, cfg.Prefix}
 }
 
-func (cache *Cache) Set(key string, value interface{}, expiration time.Duration) error {
+func (cache *Cache) Set(key string, value interface{}, expiration time.Duration) (string, error) {
 	ctx := context.Background()
 	key = cache.Prefix + key
-	err := cache.Client.Set(ctx, key, value, expiration).Err()
-	if err != nil {
-		return err
-	}
-	return nil
+	set := cache.Client.Set(ctx, key, value, expiration)
+	return set.Val(), set.Err()
 }
 
 func (cache *Cache) Get(key string) (string, error) {
 	ctx := context.Background()
 	key = cache.Prefix + key
-	val, err := cache.Client.Get(ctx, key).Result()
-	if err != nil {
-		return "", err
+	get := cache.Client.Get(ctx, key)
+	return get.Val(), get.Err()
+}
+
+func (cache *Cache) Delete(key string) (int64, error) {
+	ctx := context.Background()
+	key = cache.Prefix + key
+	del := cache.Client.Del(ctx, key)
+	return del.Val(), del.Err()
+}
+
+func (cache *Cache) FindAllKeys(key string) ([]string, error) {
+	ctx := context.Background()
+	key = cache.Prefix + key
+	var cursor uint64
+	var result []string
+	for {
+		var keys []string
+		var err error
+		keys, cursor, err = cache.Client.Scan(ctx, cursor, key+"*", 10).Result()
+		if err != nil {
+			return result, err
+		}
+		result = append(result, keys...)
+		if cursor == 0 {
+			break
+		}
 	}
-	return val, nil
+	return result, nil
 }
